@@ -1,0 +1,20 @@
+{
+    "name": "seer/pimcore-composer-copier",
+    "type": "library",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Elliot Wright",
+            "email": "elliot@elliotwright.co"
+        }
+    ],
+    "require": {},
+    "autoload": {
+        "psr-4": {
+            "SeerUK\\Composer\\": "src/SeerUK/Composer/"
+        }
+    },
+    "extra": {
+        "class": "SeerUK\\Composer\\PimcoreCopier"
+    }
+}
