@@ -32,7 +32,7 @@ final class PimcoreInstaller
 
 
     /**
-     * Copy Pimcore to the `document-root-path`, or a sensible default
+     * Copy Pimcore to the 'document-root-path', or a sensible default
      *
      * @param Event $event
      *
@@ -49,6 +49,32 @@ final class PimcoreInstaller
         self::copyFolder($from, $to);
     }
 
+    /**
+     * Copy Pimcore index.php to the 'document-root-path', or a sensible default
+     *
+     * @param Event $event
+     *
+     * @return void
+     */
+    public static function installIndex(Event $event)
+    {
+        list($installPath, $vendorPath) = self::prepareBaseDirectories($event);
+
+        $from = $vendorPath . "/pimcore/pimcore/index.php";
+        $to = $installPath . "/index.php";
+
+        if (!file_exists($to)) {
+            copy($from, $to);
+        }
+    }
+
+    /**
+     * Copy the Pimcore skeleton plugins folder to the 'document-root-path', or a sensible default
+     *
+     * @param Event $event
+     *
+     * @return void
+     */
     public static function installPlugins(Event $event)
     {
         list($installPath, $vendorPath) = self::prepareBaseDirectories($event);
