@@ -60,12 +60,30 @@ final class PimcoreInstaller
     {
         list($installPath, $vendorPath) = self::prepareBaseDirectories($event);
 
-        $from = $vendorPath . "/pimcore/pimcore/index.php";
+        $fs = self::getFilesystem();
         $to = $installPath . "/index.php";
 
-        if (!file_exists($to)) {
-            copy($from, $to);
-        }
+        $route = $fs->findShortestPath($to, $vendorPath);
+
+        $contents = <<<EOF
+<?php
+
+require_once __DIR__ . "/{$route}/autoload.php";
+require_once __DIR__ . "/pimcore/config/startup.php";
+
+try {
+    Pimcore::run();
+} catch (Exception \$e) {
+    if (class_exists("Logger")) {
+        Logger::emerg(\$e);
+    }
+
+    throw \$e;
+}
+
+EOF;
+
+        file_put_contents($to, $contents);
     }
 
     /**
