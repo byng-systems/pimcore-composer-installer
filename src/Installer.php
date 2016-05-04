@@ -13,7 +13,7 @@
  * file that was distributed with this source code.
  */
 
-namespace SeerUK\Composer;
+namespace Byng\Pimcore\Composer;
 
 use Composer\Script\Event;
 use Composer\Util\Filesystem;
@@ -23,7 +23,7 @@ use Composer\Util\Filesystem;
  *
  * @author Elliot Wright <elliot@elliotwright.co>
  */
-final class PimcoreInstaller
+final class Installer
 {
     /**
      * @var Filesystem
