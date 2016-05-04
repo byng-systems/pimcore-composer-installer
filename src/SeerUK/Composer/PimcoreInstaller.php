@@ -132,16 +132,10 @@ EOF;
     {
         list($installPath, $vendorPath) = self::prepareBaseDirectories($event);
 
+        $from = $vendorPath . "/pimcore/pimcore/.htaccess";
         $to = $installPath . "/.htaccess";
 
-        if (file_exists($to)) {
-            // .htaccess already exists, don't copy it
-            return;
-        }
-
-        if (file_exists($vendorPath . "/pimcore/pimcore/.htaccess")) {
-            $from = $vendorPath . "/pimcore/pimcore/.htaccess";
-        } else {
+        if (!file_exists($from)) {
             // unknown .htaccess file location within pimcore
             return;
         }
@@ -151,6 +145,8 @@ EOF;
 
     /**
      * Prepare base directories for copying and installation
+     *
+     * @param Event $event
      *
      * @return array
      */
