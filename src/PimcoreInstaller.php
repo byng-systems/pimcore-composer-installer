@@ -13,7 +13,7 @@
  * file that was distributed with this source code.
  */
 
-namespace Byng\Composer;
+namespace Byng\Pimcore\Composer;
 
 use Composer\Script\Event;
 use Composer\Util\Filesystem;

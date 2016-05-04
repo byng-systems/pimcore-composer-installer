@@ -12,10 +12,10 @@
     "require": {},
     "autoload": {
         "psr-4": {
-            "Byng\\Composer\\": "src/Byng/Composer/"
+            "Byng\\Pimcore\\Composer\\": "src/"
         }
     },
     "extra": {
-        "class": "Byng\\Composer\\PimcoreInstaller"
+        "class": "Byng\\Pimcore\\Composer\\PimcoreInstaller"
     }
 }
