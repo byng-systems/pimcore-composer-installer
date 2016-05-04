@@ -1,7 +1,8 @@
 {
-    "name": "seeruk/pimcore-composer-installer",
+    "name": "byng/pimcore-composer-installer",
     "type": "library",
     "license": "MIT",
+    "version": "1.0.5",
     "authors": [
         {
             "name": "Elliot Wright",
@@ -11,10 +12,10 @@
     "require": {},
     "autoload": {
         "psr-4": {
-            "SeerUK\\Composer\\": "src/SeerUK/Composer/"
+            "Byng\\Composer\\": "src/Byng/Composer/"
         }
     },
     "extra": {
-        "class": "SeerUK\\Composer\\PimcoreInstaller"
+        "class": "Byng\\Composer\\PimcoreInstaller"
     }
 }
