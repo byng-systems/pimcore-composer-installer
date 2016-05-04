@@ -19,18 +19,18 @@ composer.json
     },
     "scripts": {
         "post-install-cmd": [
-            "Byng\\Pimcore\\Composer\\PimcoreInstaller::install",
-            "Byng\\Pimcore\\Composer\\PimcoreInstaller::installIndex",
-            "Byng\\Pimcore\\Composer\\PimcoreInstaller::installPlugins",
-            "Byng\\Pimcore\\Composer\\PimcoreInstaller::installWebsite",
-            "Byng\\Pimcore\\Composer\\PimcoreInstaller::installHtAccessFile"
+            "Byng\\Pimcore\\Composer\\Installer::install",
+            "Byng\\Pimcore\\Composer\\Installer::installIndex",
+            "Byng\\Pimcore\\Composer\\Installer::installPlugins",
+            "Byng\\Pimcore\\Composer\\Installer::installWebsite",
+            "Byng\\Pimcore\\Composer\\Installer::installHtAccessFile"
         ],
         "post-update-cmd": [
-            "Byng\\Pimcore\\Composer\\PimcoreInstaller::install",
-            "Byng\\Pimcore\\Composer\\PimcoreInstaller::installIndex",
-            "Byng\\Pimcore\\Composer\\PimcoreInstaller::installPlugins",
-            "Byng\\Pimcore\\Composer\\PimcoreInstaller::installWebsite",
-            "Byng\\Pimcore\\Composer\\PimcoreInstaller::installHtAccessFile"
+            "Byng\\Pimcore\\Composer\\Installer::install",
+            "Byng\\Pimcore\\Composer\\Installer::installIndex",
+            "Byng\\Pimcore\\Composer\\Installer::installPlugins",
+            "Byng\\Pimcore\\Composer\\Installer::installWebsite",
+            "Byng\\Pimcore\\Composer\\Installer::installHtAccessFile"
         ]
     }
 }

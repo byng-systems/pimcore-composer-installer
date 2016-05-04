@@ -23,7 +23,7 @@ use Composer\Util\Filesystem;
  *
  * @author Elliot Wright <elliot@elliotwright.co>
  */
-final class PimcoreInstaller
+final class Installer
 {
     /**
      * @var Filesystem

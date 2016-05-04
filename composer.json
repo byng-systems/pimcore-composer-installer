@@ -16,6 +16,6 @@
         }
     },
     "extra": {
-        "class": "Byng\\Pimcore\\Composer\\PimcoreInstaller"
+        "class": "Byng\\Pimcore\\Composer\\Installer"
     }
 }
