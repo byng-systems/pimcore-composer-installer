@@ -157,9 +157,10 @@ final class Installer
         list($installPath, $vendorPath) = self::prepareBaseDirectories($event);
 
         $to = $installPath . "/vendor";
+        $link = self::getRelativePath($to, $vendorPath);
 
         if (!file_exists($to)) {
-            symlink($vendorPath, $to);
+            symlink($link, $to);
         }
     }
 
@@ -188,7 +189,7 @@ final class Installer
 
         return [
             $installPath,
-            $vendorPath
+            $vendorPath,
         ];
     }
 
@@ -246,5 +247,39 @@ final class Installer
         }
 
         return self::$fileSystem;
+    }
+
+    /**
+     * Get a relative path from one path (e.g. the target for a symlink) to another path (e.g. the
+     * path a symlink will point to).
+     *
+     * @param string $from
+     * @param string $to
+     *
+     * @return string
+     */
+    private static function getRelativePath($from, $to)
+    {
+        $from = explode(DIRECTORY_SEPARATOR, $from);
+        $to = explode(DIRECTORY_SEPARATOR, $to);
+
+        foreach ($from as $depth => $dir) {
+            if (isset($to[$depth])) {
+                if ($dir === $to[$depth]) {
+                    unset($to[$depth]);
+                    unset($from[$depth]);
+                } else {
+                    break;
+                }
+            }
+        }
+
+        for ($i = 0; $i < count($from) - 1; $i++) {
+            array_unshift($to, "..");
+        }
+
+        $result = implode(DIRECTORY_SEPARATOR, $to);
+
+        return $result;
     }
 }
