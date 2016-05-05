@@ -1,15 +1,13 @@
-# pimcore-composer-installer
+Pimcore Composer Installer
+==========================
 
-Installs Pimcore to your configured document-root-path via Composer.
+Installs Pimcore to your configured `document-root-path` via Composer.
 
 ## Example usage:
 
-composer.json
-
 ```
 {
-    "name": "acme/our-pimcore-website",
-    "description": "Our cool pimcore site.",
+    ...
     "config": {
         "document-root-path": "./web"
     },
@@ -19,19 +17,23 @@ composer.json
     },
     "scripts": {
         "post-install-cmd": [
-            "Byng\\Pimcore\\Composer\\Installer::install",
-            "Byng\\Pimcore\\Composer\\Installer::installIndex",
-            "Byng\\Pimcore\\Composer\\Installer::installPlugins",
-            "Byng\\Pimcore\\Composer\\Installer::installWebsite",
-            "Byng\\Pimcore\\Composer\\Installer::installHtAccessFile"
+            "Byng\\Pimcore\\Composer\\Installer::install"
         ],
         "post-update-cmd": [
-            "Byng\\Pimcore\\Composer\\Installer::install",
-            "Byng\\Pimcore\\Composer\\Installer::installIndex",
-            "Byng\\Pimcore\\Composer\\Installer::installPlugins",
-            "Byng\\Pimcore\\Composer\\Installer::installWebsite",
-            "Byng\\Pimcore\\Composer\\Installer::installHtAccessFile"
+            "Byng\\Pimcore\\Composer\\Installer::install"
         ]
-    }
+    },
+    ...
 }
 ```
+
+The `Installer` class has methods for installing individual components, this makes it very easy to
+tailor the installation to your project's needs.
+
+Note: This plugin will overwrite some files without warning. If you have modified default Pimcore 
+code then you will more than likely lose it. We recommend extending the Pimcore code to augment the
+behaviour (this also makes it easier to upgrade Pimcore in the future!)
+
+## License
+
+MIT
