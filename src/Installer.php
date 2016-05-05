@@ -32,7 +32,7 @@ final class Installer
 
 
     /**
-     * Copy Pimcore to the 'document-root-path', or a sensible default
+     * Install everything with sensible defaults. See each install method for more information.
      *
      * @param Event $event
      *
@@ -40,13 +40,12 @@ final class Installer
      */
     public static function install(Event $event)
     {
-        list($installPath, $vendorPath) = self::prepareBaseDirectories($event);
-
-        $from = $vendorPath . "/pimcore/pimcore/pimcore";
-        $to = $installPath . "/pimcore";
-
-        self::deleteFolder($to);
-        self::copyFolder($from, $to);
+        self::installHtAccessFile($event);
+        self::installIndex($event);
+        self::installPimcore($event);
+        self::installPlugins($event);
+        self::installVendorLink($event);
+        self::installWebsite($event);
     }
 
     /**
@@ -60,30 +59,33 @@ final class Installer
     {
         list($installPath, $vendorPath) = self::prepareBaseDirectories($event);
 
-        $fs = self::getFilesystem();
+        $from = $vendorPath . "/pimcore/pimcore/index.php";
         $to = $installPath . "/index.php";
 
-        $route = $fs->findShortestPath($to, $vendorPath);
+        if (!file_exists($from)) {
+            // unknown .htaccess file location within pimcore
+            return;
+        }
 
-        $contents = <<<EOF
-<?php
-
-require_once __DIR__ . "/{$route}/autoload.php";
-require_once __DIR__ . "/pimcore/config/startup.php";
-
-try {
-    Pimcore::run();
-} catch (Exception \$e) {
-    if (class_exists("Logger")) {
-        Logger::emerg(\$e);
+        copy($from, $to);
     }
 
-    throw \$e;
-}
+    /**
+     * Copy Pimcore to the 'document-root-path', or a sensible default
+     *
+     * @param Event $event
+     *
+     * @return void
+     */
+    public static function installPimcore(Event $event)
+    {
+        list($installPath, $vendorPath) = self::prepareBaseDirectories($event);
 
-EOF;
+        $from = $vendorPath . "/pimcore/pimcore/pimcore";
+        $to = $installPath . "/pimcore";
 
-        file_put_contents($to, $contents);
+        self::deleteFolder($to);
+        self::copyFolder($from, $to);
     }
 
     /**
@@ -141,6 +143,24 @@ EOF;
         }
 
         copy($from, $to);
+    }
+
+    /**
+     * Install a symlink to the vendor folder in the webroot for Pimcore.
+     *
+     * @param Event $event
+     *
+     * @return void
+     */
+    public static function installVendorLink(Event $event)
+    {
+        list($installPath, $vendorPath) = self::prepareBaseDirectories($event);
+
+        $to = $installPath . "/vendor";
+
+        if (!file_exists($to)) {
+            symlink($vendorPath, $to);
+        }
     }
 
     /**
