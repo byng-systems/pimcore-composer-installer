@@ -40,29 +40,28 @@ final class Installer
      */
     public static function download(Event $event)
     {
-        $config = $event->getComposer()->getConfig();
-        $version = $config->get("pimcore-version");
-
-        if (!$version) {
-            throw new \RuntimeException("Missing `pimcore-version` in composer.json.");
-        }
+        $version = self::preparePimcoreVersion($event);
 
         $downloadDir = __DIR__ . "/../cache/";
         $downloadPath = $downloadDir . "/pimcore-{$version}.zip";
         $downloadUrl = "https://github.com/pimcore/pimcore/archive/{$version}.zip";
 
-        file_put_contents($downloadPath, fopen($downloadUrl, "r"));
+        if (!file_exists($downloadPath)) {
+            file_put_contents($downloadPath, fopen($downloadUrl, "r"));
+        }
 
-        $archive = new \ZipArchive();
+        if (!file_exists($downloadDir . "/pimcore-{$version}")) {
+            $archive = new \ZipArchive();
 
-        if ($archive->open($downloadPath)) {
-            $archive->extractTo($downloadDir);
-            $archive->close();
-        } else {
-            throw new \RuntimeException(
-                "Unable to extract archive '%s'.",
-                realpath($downloadPath)
-            );
+            if ($archive->open($downloadPath)) {
+                $archive->extractTo($downloadDir);
+                $archive->close();
+            } else {
+                throw new \RuntimeException(
+                    "Unable to extract archive '%s'.",
+                    realpath($downloadPath)
+                );
+            }
         }
     }
 
@@ -93,9 +92,9 @@ final class Installer
      */
     public static function installIndex(Event $event)
     {
-        list($installPath, $vendorPath) = self::prepareBaseDirectories($event);
+        list($installPath, $pimcorePath) = self::prepareBaseDirectories($event);
 
-        $from = $vendorPath . "/pimcore/pimcore/index.php";
+        $from = $pimcorePath . "/index.php";
         $to = $installPath . "/index.php";
 
         if (!file_exists($from)) {
@@ -115,9 +114,9 @@ final class Installer
      */
     public static function installPimcore(Event $event)
     {
-        list($installPath, $vendorPath) = self::prepareBaseDirectories($event);
+        list($installPath, $pimcorePath) = self::prepareBaseDirectories($event);
 
-        $from = $vendorPath . "/pimcore/pimcore/pimcore";
+        $from = $pimcorePath . "/pimcore";
         $to = $installPath . "/pimcore";
 
         self::deleteFolder($to);
@@ -133,9 +132,9 @@ final class Installer
      */
     public static function installPlugins(Event $event)
     {
-        list($installPath, $vendorPath) = self::prepareBaseDirectories($event);
+        list($installPath, $pimcorePath) = self::prepareBaseDirectories($event);
 
-        $from = $vendorPath . "/pimcore/pimcore/plugins_example";
+        $from = $pimcorePath . "/plugins_example";
         $to = $installPath . "/plugins";
 
         self::copyFolder($from, $to);
@@ -151,9 +150,9 @@ final class Installer
      */
     public static function installWebsite(Event $event)
     {
-        list($installPath, $vendorPath) = self::prepareBaseDirectories($event);
+        list($installPath, $pimcorePath) = self::prepareBaseDirectories($event);
 
-        $from = $vendorPath . "/pimcore/pimcore/website_example";
+        $from = $pimcorePath . "/website_example";
         $to = $installPath . "/website";
 
         self::copyFolder($from, $to);
@@ -168,9 +167,9 @@ final class Installer
      */
     public static function installHtAccessFile(Event $event)
     {
-        list($installPath, $vendorPath) = self::prepareBaseDirectories($event);
+        list($installPath, $pimcorePath) = self::prepareBaseDirectories($event);
 
-        $from = $vendorPath . "/pimcore/pimcore/.htaccess";
+        $from = $pimcorePath . "/.htaccess";
         $to = $installPath . "/.htaccess";
 
         if (!file_exists($from)) {
@@ -190,7 +189,9 @@ final class Installer
      */
     public static function installVendorLink(Event $event)
     {
-        list($installPath, $vendorPath) = self::prepareBaseDirectories($event);
+        $vendorPath = $config = $event->getComposer()->getConfig()->get("vendor-dir");
+
+        list($installPath, $pimcorePath) = self::prepareBaseDirectories($event);
 
         $to = $installPath . "/vendor";
         $link = self::getRelativePath($to, $vendorPath);
@@ -205,28 +206,50 @@ final class Installer
      *
      * @param Event $event
      *
-     * @return array
+     * @return array Tuple, installation path on the left, Pimcore source path on the right.
      */
     private static function prepareBaseDirectories(Event $event)
     {
         $config = $event->getComposer()->getConfig();
         $cwd = getcwd();
 
-        $installPath = realpath($cwd . DIRECTORY_SEPARATOR . ($config->get("document-root-path") ?: "./www"));
-        $vendorPath = $config->get("vendor-dir");
+        $version = self::preparePimcoreVersion($event);
 
-        if (!$installPath || !$vendorPath) {
+        $installPath = realpath($cwd . DIRECTORY_SEPARATOR . ($config->get("document-root-path") ?: "./www"));
+        $pimcorePath = __DIR__ . "/../cache/pimcore-{$version}";
+
+        if (!$installPath || !$pimcorePath) {
             throw new \RuntimeException(
-                "Invalid install path, or vendor path. Note: the directories must exist. " .
-                "Install path was '" . $installPath . "'. Vendor path was '" . $vendorPath . "'. " .
+                "Invalid install path, or pimcore path. Note: the directories must exist. " .
+                "Install path was '" . $installPath . "'. Pimcore path was '" . $pimcorePath . "'. " .
                 "Aborting Pimcore installation. "
             );
         }
 
         return [
             $installPath,
-            $vendorPath,
+            $pimcorePath,
         ];
+    }
+
+    /**
+     * Prepare the Pimcore version value for the installers.
+     *
+     * @param Event $event
+     * @return string
+     *
+     * @throws \RuntimeException if the `pimcore-version` config value is missing.
+     */
+    private static function preparePimcoreVersion(Event $event)
+    {
+        $config = $event->getComposer()->getConfig();
+        $version = $config->get("pimcore-version");
+
+        if (!$version) {
+            throw new \RuntimeException("Missing `pimcore-version` in composer.json.");
+        }
+
+        return $version;
     }
 
     /**
