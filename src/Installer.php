@@ -32,6 +32,41 @@ final class Installer
 
 
     /**
+     * Download Pimcore, and extract it to a location we can copy it's contents from.
+     *
+     * @param Event $event
+     *
+     * @return void
+     */
+    public static function download(Event $event)
+    {
+        $config = $event->getComposer()->getConfig();
+        $version = $config->get("pimcore-version");
+
+        if (!$version) {
+            throw new \RuntimeException("Missing `pimcore-version` in composer.json.");
+        }
+
+        $downloadDir = __DIR__ . "/../cache/";
+        $downloadPath = $downloadDir . "/pimcore-{$version}.zip";
+        $downloadUrl = "https://github.com/pimcore/pimcore/archive/{$version}.zip";
+
+        file_put_contents($downloadPath, fopen($downloadUrl, "r"));
+
+        $archive = new \ZipArchive();
+
+        if ($archive->open($downloadPath)) {
+            $archive->extractTo($downloadDir);
+            $archive->close();
+        } else {
+            throw new \RuntimeException(
+                "Unable to extract archive '%s'.",
+                realpath($downloadPath)
+            );
+        }
+    }
+
+    /**
      * Install everything with sensible defaults. See each install method for more information.
      *
      * @param Event $event
@@ -40,6 +75,7 @@ final class Installer
      */
     public static function install(Event $event)
     {
+        self::download($event);
         self::installHtAccessFile($event);
         self::installIndex($event);
         self::installPimcore($event);
