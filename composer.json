@@ -2,7 +2,7 @@
     "name": "byng/pimcore-composer-installer",
     "type": "library",
     "license": "MIT",
-    "version": "2.0.1",
+    "version": "3.0.0",
     "authors": [
         {
             "name": "Elliot Wright",
