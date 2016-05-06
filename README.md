@@ -14,7 +14,7 @@ Two config entries are required in your project's composer.json file:
 * `document-root-path`: This is the Pimcore web-root, i.e. where index.php will be, and where files
 will be served from.
 * `pimcore-version`: This is the exact Pimcore version that you want to use. This cannot be part of
-your project's required dependenies because the version downloaded by Composer would clash with the
+your project's required dependencies because the version downloaded by Composer would clash with the
 Pimcore autoloader.
 
 You must then also specify the installer as `post-install-cmd` and `post-update-cmd` scripts.
