@@ -81,6 +81,38 @@ final class Installer
         self::installPlugins($event);
         self::installVendorLink($event);
         self::installWebsite($event);
+        self::deleteCache($event);
+    }
+
+    /**
+     * Deleted the cache folder after Pimcore has been installed to prevent IDEs
+     * from indexing the Pimcore folder twice.
+     *
+     * @param Event $event
+     *
+     * @return void
+     */
+    public static function deleteCache(Event $event)
+    {
+        $version = self::preparePimcoreVersion($event);
+
+        $downloadDir = __DIR__ . "/../cache/";
+        $downloadPath = $downloadDir . "/pimcore-{$version}/";
+
+        $files = new \RecursiveIteratorIterator(
+            new \RecursiveDirectoryIterator(
+                $downloadPath,
+                \RecursiveDirectoryIterator::SKIP_DOTS
+            ),
+            \RecursiveIteratorIterator::CHILD_FIRST
+        );
+
+        foreach ($files as $fileinfo) {
+            $command = ($fileinfo->isDir() ? 'rmdir' : 'unlink');
+            $command($fileinfo->getRealPath());
+        }
+
+        rmdir($downloadPath);
     }
 
     /**
