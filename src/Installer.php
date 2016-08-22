@@ -74,6 +74,10 @@ final class Installer
      */
     public static function install(Event $event)
     {
+        if (self::isInstalled($event)) {
+            return;
+        }
+        
         self::download($event);
         self::installHtAccessFile($event);
         self::installIndex($event);
@@ -84,6 +88,29 @@ final class Installer
         self::deleteCache($event);
     }
 
+    /**
+     * Checks if Pimcore is already installed and is the same version as requested.
+     * 
+     * @param Event $event
+     * 
+     * @return boolean
+     */
+    public static function isInstalled(Event $event)
+    {
+        $version = self::preparePimcoreVersion($event);
+        list($installPath, $pimcorePath) = self::prepareBaseDirectories($event);
+        $versionFile = $installPath . "/pimcore/lib/Pimcore/Version.php";
+        
+        if (file_exists($versionFile)) {
+            require_once $versionFile;
+            if (\Pimcore\Version::$version === $version) {
+                return true;
+            }
+        }
+        
+        return false;
+    }
+    
     /**
      * Deleted the cache folder after Pimcore has been installed to prevent IDEs
      * from indexing the Pimcore folder twice.
