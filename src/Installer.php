@@ -74,6 +74,10 @@ final class Installer
      */
     public static function install(Event $event)
     {
+        if (self::isInstalled($event)) {
+            return;
+        }
+        
         self::download($event);
         self::installHtAccessFile($event);
         self::installIndex($event);
@@ -81,6 +85,61 @@ final class Installer
         self::installPlugins($event);
         self::installVendorLink($event);
         self::installWebsite($event);
+        self::deleteCache($event);
+    }
+
+    /**
+     * Checks if Pimcore is already installed and is the same version as requested.
+     * 
+     * @param Event $event
+     * 
+     * @return boolean
+     */
+    public static function isInstalled(Event $event)
+    {
+        $version = self::preparePimcoreVersion($event);
+        list($installPath, $pimcorePath) = self::prepareBaseDirectories($event);
+        $versionFile = $installPath . "/pimcore/lib/Pimcore/Version.php";
+        
+        if (file_exists($versionFile)) {
+            require_once $versionFile;
+            if (\Pimcore\Version::$version === $version) {
+                return true;
+            }
+        }
+        
+        return false;
+    }
+    
+    /**
+     * Deleted the cache folder after Pimcore has been installed to prevent IDEs
+     * from indexing the Pimcore folder twice.
+     *
+     * @param Event $event
+     *
+     * @return void
+     */
+    public static function deleteCache(Event $event)
+    {
+        $version = self::preparePimcoreVersion($event);
+
+        $downloadDir = __DIR__ . "/../cache/";
+        $downloadPath = $downloadDir . "/pimcore-{$version}/";
+
+        $files = new \RecursiveIteratorIterator(
+            new \RecursiveDirectoryIterator(
+                $downloadPath,
+                \RecursiveDirectoryIterator::SKIP_DOTS
+            ),
+            \RecursiveIteratorIterator::CHILD_FIRST
+        );
+
+        foreach ($files as $fileinfo) {
+            $command = ($fileinfo->isDir() ? 'rmdir' : 'unlink');
+            $command($fileinfo->getRealPath());
+        }
+
+        rmdir($downloadPath);
     }
 
     /**
